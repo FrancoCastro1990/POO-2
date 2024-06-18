@@ -1,12 +1,12 @@
 package org.duocuc.Book;
 
-public class Book {
+public class Book implements Comparable<Book>{
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -34,16 +34,36 @@ public class Book {
         isAvailable = available;
     }
 
-    private int id;
+    private long id;
     private String name;
     private String author;
     private boolean isAvailable;
 
 
-    public Book(int id, String name, String author, boolean isAvailable) {
+    public Book(long id, String name, String author, boolean isAvailable) {
         this.id = id;
         this.name = name;
         this.author = author;
         this.isAvailable = isAvailable;
+    }
+
+    @Override
+    public int compareTo(Book other) {
+        return this.name.compareToIgnoreCase(other.name);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Book book = (Book) o;
+
+        return name != null ? name.equalsIgnoreCase(book.name) : book.name == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return name != null ? name.toLowerCase().hashCode() : 0;
     }
 }
