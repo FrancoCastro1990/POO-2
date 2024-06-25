@@ -228,7 +228,7 @@ public class Manager {
     private void getBooksInOrder() {
         System.out.println("Libros en orden alfabético:");
         for (Book book : library.getBooksInOrder()) {
-            System.out.println(book.getName());
+            System.out.println(book.toString());
         }
     }
 

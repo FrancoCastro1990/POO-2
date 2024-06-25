@@ -66,4 +66,8 @@ public class Book implements Comparable<Book>{
     public int hashCode() {
         return name != null ? name.toLowerCase().hashCode() : 0;
     }
+
+    public String toString() {
+        return this.id+","+this.name+","+this.author+","+this.isAvailable;
+    }
 }

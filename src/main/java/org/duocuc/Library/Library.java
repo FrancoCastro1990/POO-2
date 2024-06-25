@@ -4,6 +4,7 @@ import org.duocuc.Book.Book;
 import org.duocuc.Exceptions.BookNotAvailableException;
 import org.duocuc.Exceptions.BookNotFoundException;
 import org.duocuc.Exceptions.UserNotFoundException;
+import org.duocuc.Repository.Repository;
 import org.duocuc.User.User;
 
 import java.util.*;
@@ -12,7 +13,11 @@ public class Library {
 
     private HashMap<String, User> users;
     private ArrayList<Book> books;
+
     private HashSet<Book> borrowedBooks;
+
+    private Repository<Book> bookRepository;
+    private Repository<User> userRepository;
 
     public Library() {
         this.users = new HashMap<>();
@@ -22,6 +27,14 @@ public class Library {
     public Library(HashMap<String, User> users, ArrayList<Book> books) {
         this.users = users;
         this.books = books;
+    }
+
+    public Library(Repository<Book> bookRepository, Repository<User> userRepository) {
+        this.users = new HashMap<>();
+        this.books = new ArrayList<>();
+        this.borrowedBooks = new HashSet<>();
+        this.bookRepository = bookRepository;
+        this.userRepository = userRepository;
     }
 
     public HashMap<String, User> getUsers() {
@@ -38,11 +51,14 @@ public class Library {
 
     public void setBooks(ArrayList<Book> books) {
         this.books = books;
+        createBorrowedBooks(books);
     }
 
 
     public void addUser(User user) {
+
         this.users.put(user.getRut(), user);
+        this.userRepository.add(user);
     }
 
     //metodo para buscar un usuario
@@ -59,11 +75,14 @@ public class Library {
         User removedUser = users.remove(rut);
         if (removedUser == null) {
             throw new UserNotFoundException("Usuario con RUT '" + rut + "' no encontrado.");
+        } else {
+            this.userRepository.updateAll(new ArrayList<>(users.values()));
         }
     }
 
     public void addBook(Book book) {
         books.add(book);
+        this.bookRepository.add(book);
     }
 
     //metodo para buscar un libro, de no existir retorna un error
@@ -81,6 +100,7 @@ public class Library {
         for (Book book : books) {
             if (book.getName().equalsIgnoreCase(name)) {
                 books.remove(book);
+                bookRepository.updateAll(books);
                 return book;
             }
         }
@@ -97,6 +117,12 @@ public class Library {
         if (!borrowedBooks.add(book)) {
             throw new BookNotAvailableException("El libro '" + bookName + "' ya está prestado.");
         }
+        for(Book currentBook:books){
+            if(currentBook.equals(book)) {
+                currentBook.setAvailable(false);
+            }
+        }
+        bookRepository.updateAll(books);
         return book;
     }
 
@@ -106,10 +132,24 @@ public class Library {
         if (!borrowedBooks.remove(book)) {
             throw new BookNotFoundException("El libro '" + bookName + "' no está registrado como prestado.");
         }
+        for(Book currentBook:books){
+            if(currentBook.equals(book)) {
+                currentBook.setAvailable(true);
+            }
+        }
+        bookRepository.updateAll(books);
         return book;
     }
 
     public HashSet<Book> getBorrowedBooks() {
         return borrowedBooks;
+    }
+
+    public void createBorrowedBooks(ArrayList<Book> books) {
+        for(Book book:books){
+            if(book.isAvailable() == false){
+                borrowedBooks.add(book);
+            }
+        }
     }
 }
